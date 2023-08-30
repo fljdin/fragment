@@ -14,9 +14,10 @@ var psql = Language{
 		{Start: `/*`, End: `*/`},
 		{Start: `'`, End: `'`},
 		{Start: `"`, End: `"`},
-		// {Start: `BEGIN`, End: `END`},
-		// {Start: `BEGIN`, End: `COMMIT`},
-		// {Start: `BEGIN`, End: `ROLLBACK`},
+		{
+			Start: []string{`BEGIN`},
+			End:   []string{`END`, `COMMIT`, `ROLLBACK`},
+		},
 	},
 }
 
@@ -82,22 +83,22 @@ func TestStringRules(t *testing.T) {
 	}
 }
 
-// func TestTransactionRules(t *testing.T) {
-// 	input := dedent.Dedent(`
-// 		begin; SELECT 1; end;
-// 		BEGIN; SELECT 1; COMMIT;
-// 		begin; SELECT 1; rollback;
-// 		BEGIN; SELECT 'END'; END;
-// 	`)
-// 	expected := []string{
-// 		`begin; SELECT 1; end;`,
-// 		`BEGIN; SELECT 1; COMMIT;`,
-// 		`begin; SELECT 1; rollback;`,
-// 		`BEGIN; SELECT 'END'; END;`,
-// 	}
-// 	fragments := psql.Split(input)
-//
-// 	for i, fragment := range fragments {
-// 		require.Equal(t, expected[i], fragment)
-// 	}
-// }
+func TestTransactionRules(t *testing.T) {
+	input := dedent.Dedent(`
+		begin; SELECT 1; end;
+		BEGIN; SELECT 1; COMMIT;
+		begin; SELECT 1; rollback;
+		BEGIN; SELECT 'END'; END;
+	`)
+	expected := []string{
+		`begin; SELECT 1; end;`,
+		`BEGIN; SELECT 1; COMMIT;`,
+		`begin; SELECT 1; rollback;`,
+		`BEGIN; SELECT 'END'; END;`,
+	}
+	fragments := psql.Split(input)
+
+	for i, fragment := range fragments {
+		require.Equal(t, expected[i], fragment)
+	}
+}

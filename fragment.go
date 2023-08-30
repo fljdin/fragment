@@ -7,8 +7,8 @@ import (
 )
 
 type RangeRule struct {
-	Start string
-	End   string
+	Start any
+	End   any
 }
 
 type Language struct {
@@ -24,11 +24,18 @@ func trimAndAppend(slice []string, element string) []string {
 	return slice
 }
 
-func hasSuffixFold(s, suffix []byte) bool {
-	if len(s) < len(suffix) {
+func hasSuffixFold(input, suffix []byte) bool {
+	if len(input) < len(suffix) {
 		return false
 	}
-	return bytes.EqualFold(s[len(s)-len(suffix):], suffix)
+	return bytes.EqualFold(input[len(input)-len(suffix):], suffix)
+}
+
+func toBytes(input string) []byte {
+	if input == "\\n" {
+		return []byte("\x0a")
+	}
+	return []byte(input)
 }
 
 func (lang *Language) Split(input string) []string {
@@ -48,21 +55,14 @@ Scan:
 		if currentRule == nil {
 			// Look for a new rule
 			for _, rule := range lang.Rules {
-				if hasSuffixFold(fragment.Bytes(), []byte(rule.Start)) {
+				if rule.IsStartDetected(fragment.Bytes()) {
 					currentRule = &rule
 					continue Scan
 				}
 			}
 		} else {
 			// Look for the end of the current rule
-			var stopBytes []byte
-			if currentRule.End == "\\n" {
-				stopBytes = []byte("\x0a")
-			} else {
-				stopBytes = []byte(currentRule.End)
-			}
-
-			if hasSuffixFold(fragment.Bytes(), stopBytes) {
+			if currentRule.IsEndDetected(fragment.Bytes()) {
 				currentRule = nil
 			}
 			continue Scan
@@ -83,4 +83,36 @@ Scan:
 	}
 
 	return fragments
+}
+
+func (r *RangeRule) IsStartDetected(input []byte) bool {
+	switch start := r.Start.(type) {
+	case string:
+		if hasSuffixFold(input, []byte(start)) {
+			return true
+		}
+	case []string:
+		for _, start := range start {
+			if hasSuffixFold(input, []byte(start)) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (r *RangeRule) IsEndDetected(input []byte) bool {
+	switch end := r.End.(type) {
+	case string:
+		if hasSuffixFold(input, toBytes(end)) {
+			return true
+		}
+	case []string:
+		for _, end := range end {
+			if hasSuffixFold(input, toBytes(end)) {
+				return true
+			}
+		}
+	}
+	return false
 }
