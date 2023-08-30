@@ -9,16 +9,13 @@ import (
 
 var psql = Language{
 	Delimiters: []string{`;`},
-	Rules: []RangeRule{
+	Rules: []Rule{
 		StringRule{Start: `--`, End: `\n`},
 		StringRule{Start: `/*`, End: `*/`},
 		StringRule{Start: `'`, End: `'`},
 		StringRule{Start: `"`, End: `"`},
-		StringRule{
-			Start: []string{`BEGIN`},
-			End:   []string{`END`, `COMMIT`, `ROLLBACK`},
-		},
-		RegexRule{Start: `\$([a-zA-Z0-9_])*\$`, End: `\$\1\$`},
+		&RegexRule{Start: `(?i)BEGIN`, End: `(?i)END|COMMIT|ROLLBACK`},
+		&RegexRule{Start: `(\$([a-zA-Z0-9_]*)\$)`, End: `\$\2\$`},
 	},
 }
 
@@ -104,20 +101,20 @@ func TestTransactionRules(t *testing.T) {
 	}
 }
 
-// func TestRegexRules(t *testing.T) {
-// 	input := dedent.Dedent(`
-// 		SELECT $$;$$;
-// 		SELECT $tag$;$tag$;
-// 		SELECT $tag$tag;$tag$;
-// 	`)
-// 	expected := []string{
-// 		`SELECT $$;$$;`,
-// 		`SELECT $tag$;$tag$;`,
-// 		`SELECT $tag$tag;$tag$;`,
-// 	}
-// 	fragments := psql.Split(input)
-//
-// 	for i, fragment := range fragments {
-// 		require.Equal(t, expected[i], fragment)
-// 	}
-// }
+func TestRegexRules(t *testing.T) {
+	input := dedent.Dedent(`
+		SELECT $$;$$;
+		SELECT $tag$;$tag$;
+		SELECT $tag$tag;$tag$;
+	`)
+	expected := []string{
+		`SELECT $$;$$;`,
+		`SELECT $tag$;$tag$;`,
+		`SELECT $tag$tag;$tag$;`,
+	}
+	fragments := psql.Split(input)
+
+	for i, fragment := range fragments {
+		require.Equal(t, expected[i], fragment)
+	}
+}

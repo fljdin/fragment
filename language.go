@@ -16,17 +16,17 @@ func trimAndAppend(slice []string, element string) []string {
 
 type Language struct {
 	Delimiters []string
-	Rules      []RangeRule
+	Rules      []Rule
 }
 
-func (lang *Language) Split(input string) []string {
+func (lang Language) Split(input string) []string {
 	var fragment bytes.Buffer
 	var fragments []string
 
 	scanner := bufio.NewScanner(strings.NewReader(input))
 	scanner.Split(bufio.ScanBytes)
 
-	var currentRule RangeRule
+	var currentRule Rule
 
 Scan:
 	for scanner.Scan() {

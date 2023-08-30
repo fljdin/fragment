@@ -21,28 +21,57 @@ Import package
 import "github.com/fljdin/fragment"
 ```
 
-### Defining Language
-
-Every text input follow predefined language's delimiter and rules.
+Every text input follows predefined language's delimiter and rules.
 
 ```go
 type Language struct {
 	Delimiters []string
-	Rules      []RangeRule
+	Rules      []Rule
 }
 ```
 
 The `Language` struct is used to define the delimiters and rules for text
-splitting. Each `RangeRule` consists of a start and end condition that defines a
+splitting. Each `Rule` consists of a start and end condition that defines a
 context in which delimiters should be ignored.
 
+### StringRule
+
+The `StringRule` struct defines simple string-based rules to detect the start
+and end of fragments.
+
 ```go
-// define the source language
+// define a basic escape newline rule
+escape := fragment.StringRule{
+    Start: "\\",
+    End:   "\n",
+}
+
+// define a new language to split lines from a text
 file := fragment.Language{
     Delimiters: []string{"\n"},
-    Rules: []RangeRule{
-        {Start: "\\", End: "\n"},
-    }
+    Rules:      []fragment.Rule{escape},
+}
+```
+
+### RegexRule
+
+The `RegexRule` struct allows use of regular expressions to define rules for
+detecting the start and end of fragments. You can also use capture groups in the
+`End` regex to dynamically replace placeholders in the matched text.
+
+To handle capture group, the `RegexRule` must be passed by pointer:
+
+```go
+// define a postgresql dollar-quoted expression rule
+dollar := &fragment.RegexRule{
+    Start: `\$([a-zA-Z0-9_]*)\$`,
+    End:   `\$\1\$`,
+}
+
+// define a new language to split queries from a text
+pgsql := fragment.Language{
+    Delimiters: []string{";"},
+    Rules:      []fragment.Rule{dollar}
 }
 ```
 
