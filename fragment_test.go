@@ -10,14 +10,15 @@ import (
 var psql = Language{
 	Delimiters: []string{`;`},
 	Rules: []RangeRule{
-		{Start: `--`, End: `\n`},
-		{Start: `/*`, End: `*/`},
-		{Start: `'`, End: `'`},
-		{Start: `"`, End: `"`},
-		{
+		StringRule{Start: `--`, End: `\n`},
+		StringRule{Start: `/*`, End: `*/`},
+		StringRule{Start: `'`, End: `'`},
+		StringRule{Start: `"`, End: `"`},
+		StringRule{
 			Start: []string{`BEGIN`},
 			End:   []string{`END`, `COMMIT`, `ROLLBACK`},
 		},
+		RegexRule{Start: `\$([a-zA-Z0-9_])*\$`, End: `\$\1\$`},
 	},
 }
 
@@ -102,3 +103,21 @@ func TestTransactionRules(t *testing.T) {
 		require.Equal(t, expected[i], fragment)
 	}
 }
+
+// func TestRegexRules(t *testing.T) {
+// 	input := dedent.Dedent(`
+// 		SELECT $$;$$;
+// 		SELECT $tag$;$tag$;
+// 		SELECT $tag$tag;$tag$;
+// 	`)
+// 	expected := []string{
+// 		`SELECT $$;$$;`,
+// 		`SELECT $tag$;$tag$;`,
+// 		`SELECT $tag$tag;$tag$;`,
+// 	}
+// 	fragments := psql.Split(input)
+//
+// 	for i, fragment := range fragments {
+// 		require.Equal(t, expected[i], fragment)
+// 	}
+// }
