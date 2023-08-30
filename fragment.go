@@ -70,7 +70,7 @@ Scan:
 
 		// Look for a delimiter
 		for _, delimiter := range lang.Delimiters {
-			if hasSuffixFold(fragment.Bytes(), []byte(delimiter)) {
+			if hasSuffixFold(fragment.Bytes(), toBytes(delimiter)) {
 				fragments = trimAndAppend(fragments, fragment.String())
 				fragment.Reset()
 				break
@@ -88,12 +88,12 @@ Scan:
 func (r *RangeRule) IsStartDetected(input []byte) bool {
 	switch start := r.Start.(type) {
 	case string:
-		if hasSuffixFold(input, []byte(start)) {
+		if hasSuffixFold(input, toBytes(start)) {
 			return true
 		}
 	case []string:
 		for _, start := range start {
-			if hasSuffixFold(input, []byte(start)) {
+			if hasSuffixFold(input, toBytes(start)) {
 				return true
 			}
 		}
