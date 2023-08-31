@@ -1,8 +1,9 @@
-package fragment
+package tests
 
 import (
 	"testing"
 
+	. "github.com/fljdin/fragment"
 	"github.com/lithammer/dedent"
 	"github.com/stretchr/testify/require"
 )

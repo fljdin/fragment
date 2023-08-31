@@ -48,7 +48,7 @@ func (r RegexRule) groupAsRegex() string {
 	result := re.ReplaceAllFunc([]byte(r.Stop), func(match []byte) []byte {
 		idxStr := match[1:]
 		idx, err := strconv.Atoi(string(idxStr))
-		// replace unkown index by empty string
+		// replace unknown index by empty string
 		if err != nil || idx < 1 || idx > len(r.matches) {
 			return []byte{}
 		}

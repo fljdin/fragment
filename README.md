@@ -1,5 +1,8 @@
 # Fragment
 
+[![tests](https://github.com/fljdin/fragment/actions/workflows/tests.yml/badge.svg)](https://github.com/fljdin/fragment/actions/workflows/tests.yml)
+[![go report](https://goreportcard.com/badge/github.com/fljdin/fragment)](https://goreportcard.com/report/github.com/fljdin/fragment)
+
 Fragment is a Go package designed to split text into fragments. It provides a
 convenient way to extract meaningful units of text from a larger body of text,
 while also supporting special rules to ignore delimiters within specific
@@ -33,7 +36,7 @@ Every text input follows predefined language's delimiter and rules.
 ### StringRule
 
 The `StringRule` struct defines simple string-based rules to detect the start
-and stop of fragments. Here a concise example of newline separated fragments
+and stop of fragments. Here's a concise example of newline separated fragments
 with an exception rule when escape character preceed a newline (inpired from
 shell syntax).
 
@@ -123,6 +126,14 @@ Will print:
 ---- Line 2 \
       on multiple lines
 ---- Line 3
+```
+
+## Testing
+
+Unit tests are provided under `tests` package.
+
+```bash
+go test ./tests
 ```
 
 ## Contributing
