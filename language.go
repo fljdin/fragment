@@ -33,20 +33,24 @@ Scan:
 		char := scanner.Bytes()
 		fragment.Write(char)
 
+		// Look for a new rule
 		if currentRule == nil {
-			// Look for a new rule
 			for _, rule := range lang.Rules {
 				if rule.IsStarted(fragment.Bytes()) {
 					currentRule = rule
 					continue Scan
 				}
 			}
-		} else {
-			// Look for the end of the current rule
-			if currentRule.IsStopped(fragment.Bytes()) {
-				currentRule = nil
+		}
+
+		// Look for the end of the current rule
+		if currentRule != nil {
+			if currentRule.UseStopRule() {
+				if currentRule.IsStopped(fragment.Bytes()) {
+					currentRule = nil
+				}
+				continue Scan
 			}
-			continue Scan
 		}
 
 		// Look for a delimiter

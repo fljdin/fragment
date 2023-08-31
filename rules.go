@@ -8,11 +8,13 @@ import (
 type Rule interface {
 	IsStarted(input []byte) bool
 	IsStopped(input []byte) bool
+	UseStopRule() bool
 }
 
 type StringRule struct {
-	Start string
-	Stop  string
+	Start       string
+	Stop        string
+	StopAtDelim bool
 }
 
 func (s StringRule) IsStarted(input []byte) bool {
@@ -21,6 +23,10 @@ func (s StringRule) IsStarted(input []byte) bool {
 
 func (s StringRule) IsStopped(input []byte) bool {
 	return hasSuffix(input, toBytes(s.Stop))
+}
+
+func (s StringRule) UseStopRule() bool {
+	return !s.StopAtDelim
 }
 
 type RegexRule struct {
@@ -55,4 +61,8 @@ func (r RegexRule) groupAsRegex() string {
 		return r.matches[idx]
 	})
 	return string(result)
+}
+
+func (r RegexRule) UseStopRule() bool {
+	return true
 }

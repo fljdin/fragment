@@ -5,12 +5,12 @@
 
 Fragment is a Go package designed to split text into fragments. It provides a
 convenient way to extract meaningful units of text from a larger body of text,
-while also supporting special rules to ignore delimiters within specific
-contexts.
+while also supporting special rules to ignore delimiters or other rules within
+specific contexts.
 
 ## Installation
 
-install the package using the following command:
+Install package using the following command:
 
 ```bash
 go get github.com/fljdin/fragment
@@ -18,20 +18,18 @@ go get github.com/fljdin/fragment
 
 ## Usage
 
-Import package
-
 ```go
 import "github.com/fljdin/fragment"
 ```
 
-Every text input follows predefined language's delimiter and rules.
+Every text input follows predefined language's delimiters and rules.
 
-* The `Language` struct is used to define the **delimiters** and **rules** for
+* The `Language` struct defines the **delimiters** and **rules** required by
   text splitting.
 * A new fragment is built as soon as one of the **delimiters** is detected when
   reading the text.
 * Each `Rule` consists of a start and stop condition that defines a context in
-  which **delimiters** should be ignored.
+  which **delimiters** and other **rules** should be ignored.
 
 ### StringRule
 
@@ -51,6 +49,24 @@ escape := fragment.StringRule{
 text := fragment.Language{
     Delimiters: []string{"\n"},
     Rules:      []fragment.Rule{escape},
+}
+```
+
+In some cases, delimiters may not be ignored by a rule. The following example
+shows how to define a comment that ends with a newline delimiter. The field
+`Stop` is replaced by `StopAtDelim`.
+
+```go
+// define a one-line comment rule, inspired from shell 
+comment := fragment.StringRule{
+    Start:       "#",
+    StopAtDelim: true,
+}
+
+// define a new language to split commands from a script
+shell := fragment.Language{
+    Delimiters: []string{"\n"},
+    Rules:      []fragment.Rule{comment}
 }
 ```
 
@@ -87,11 +103,13 @@ without considering letter case. Here's an example of using the case-insensitive
 flag to create a rule for XML markup tags:
 
 ```go
+// define a markup rule with capture group and placeholder
 markup := &fragment.RegexRule{
     Start: `(?i)<(\w+)>`,
     Stop:  `(?i)</\1>`,
 }
 
+// define a new language to split XML documents from a file
 xml := fragment.Language{
     Delimiters: []string{`\n`},
     Rules:      []fragment.Rule{markup},

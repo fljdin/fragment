@@ -12,6 +12,7 @@ var shell = Language{
 	Delimiters: []string{"\n"},
 	Rules: []Rule{
 		StringRule{Start: "\\", Stop: "\n"},
+		StringRule{Start: "#", StopAtDelim: true},
 	},
 }
 
@@ -46,13 +47,13 @@ func TestNewlineEscapeRule(t *testing.T) {
 	require.Equal(t, "false", fragments[1])
 }
 
-// func TestCommentRule(t *testing.T) {
-// 	input := dedent.Dedent(`
-// 		true # comment \
-// 		false
-// 	`)
-// 	fragments := shell.Split(input)
-//
-// 	require.Equal(t, "true", fragments[0])
-// 	require.Equal(t, "false", fragments[1])
-// }
+func TestCommentRule(t *testing.T) {
+	input := dedent.Dedent(`
+		true # comment \
+		false
+	`)
+	fragments := shell.Split(input)
+
+	require.Equal(t, "true # comment \\", fragments[0])
+	require.Equal(t, "false", fragments[1])
+}
