@@ -16,11 +16,11 @@ type StringRule struct {
 }
 
 func (s StringRule) IsStarted(input []byte) bool {
-	return hasSuffixFold(input, toBytes(s.Start))
+	return hasSuffix(input, toBytes(s.Start))
 }
 
 func (s StringRule) IsStopped(input []byte) bool {
-	return hasSuffixFold(input, toBytes(s.Stop))
+	return hasSuffix(input, toBytes(s.Stop))
 }
 
 type RegexRule struct {

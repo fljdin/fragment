@@ -4,11 +4,11 @@ import (
 	"bytes"
 )
 
-func hasSuffixFold(input, suffix []byte) bool {
+func hasSuffix(input, suffix []byte) bool {
 	if len(input) < len(suffix) {
 		return false
 	}
-	return bytes.EqualFold(input[len(input)-len(suffix):], suffix)
+	return bytes.HasSuffix(input, suffix)
 }
 
 func toBytes(input string) []byte {

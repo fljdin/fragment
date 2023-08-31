@@ -51,7 +51,7 @@ Scan:
 
 		// Look for a delimiter
 		for _, delimiter := range lang.Delimiters {
-			if hasSuffixFold(fragment.Bytes(), toBytes(delimiter)) {
+			if hasSuffix(fragment.Bytes(), toBytes(delimiter)) {
 				fragments = trimAndAppend(fragments, fragment.String())
 				fragment.Reset()
 				break

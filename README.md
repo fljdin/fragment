@@ -78,6 +78,23 @@ pgsql := fragment.Language{
 }
 ```
 
+To perform case-insensitive searches, use the `(?i)` flag within your regular
+expression pattern. This flag indicates that the pattern matching should be done
+without considering letter case. Here's an example of using the case-insensitive
+flag to create a rule for XML markup tags:
+
+```go
+markup := &fragment.RegexRule{
+    Start: `(?i)<(\w+)>`,
+    Stop:  `(?i)</\1>`,
+}
+
+xml := fragment.Language{
+    Delimiters: []string{`\n`},
+    Rules:      []fragment.Rule{markup},
+}
+```
+
 ### Splitting Text
 
 You can use the `Split` method of the `Language` struct to split text into
