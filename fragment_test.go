@@ -10,12 +10,12 @@ import (
 var psql = Language{
 	Delimiters: []string{`;`},
 	Rules: []Rule{
-		StringRule{Start: `--`, End: `\n`},
-		StringRule{Start: `/*`, End: `*/`},
-		StringRule{Start: `'`, End: `'`},
-		StringRule{Start: `"`, End: `"`},
-		&RegexRule{Start: `(?i)BEGIN`, End: `(?i)END|COMMIT|ROLLBACK`},
-		&RegexRule{Start: `(\$([a-zA-Z0-9_]*)\$)`, End: `\$\2\$`},
+		StringRule{Start: `--`, Stop: `\n`},
+		StringRule{Start: `/*`, Stop: `*/`},
+		StringRule{Start: `'`, Stop: `'`},
+		StringRule{Start: `"`, Stop: `"`},
+		&RegexRule{Start: `(?i)BEGIN`, Stop: `(?i)END|COMMIT|ROLLBACK`},
+		&RegexRule{Start: `(\$([a-zA-Z0-9_]*)\$)`, Stop: `\$\2\$`},
 	},
 }
 

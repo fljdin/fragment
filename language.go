@@ -36,14 +36,14 @@ Scan:
 		if currentRule == nil {
 			// Look for a new rule
 			for _, rule := range lang.Rules {
-				if rule.IsStartDetected(fragment.Bytes()) {
+				if rule.IsStarted(fragment.Bytes()) {
 					currentRule = rule
 					continue Scan
 				}
 			}
 		} else {
 			// Look for the end of the current rule
-			if currentRule.IsEndDetected(fragment.Bytes()) {
+			if currentRule.IsStopped(fragment.Bytes()) {
 				currentRule = nil
 			}
 			continue Scan

@@ -23,31 +23,29 @@ import "github.com/fljdin/fragment"
 
 Every text input follows predefined language's delimiter and rules.
 
-```go
-type Language struct {
-	Delimiters []string
-	Rules      []Rule
-}
-```
-
-The `Language` struct is used to define the delimiters and rules for text
-splitting. Each `Rule` consists of a start and end condition that defines a
-context in which delimiters should be ignored.
+* The `Language` struct is used to define the **delimiters** and **rules** for
+  text splitting.
+* A new fragment is built as soon as one of the **delimiters** is detected when
+  reading the text.
+* Each `Rule` consists of a start and stop condition that defines a context in
+  which **delimiters** should be ignored.
 
 ### StringRule
 
 The `StringRule` struct defines simple string-based rules to detect the start
-and end of fragments.
+and stop of fragments. Here a concise example of newline separated fragments
+with an exception rule when escape character preceed a newline (inpired from
+shell syntax).
 
 ```go
 // define a basic escape newline rule
 escape := fragment.StringRule{
     Start: "\\",
-    End:   "\n",
+    Stop:  "\n",
 }
 
 // define a new language to split lines from a text
-file := fragment.Language{
+text := fragment.Language{
     Delimiters: []string{"\n"},
     Rules:      []fragment.Rule{escape},
 }
@@ -56,16 +54,21 @@ file := fragment.Language{
 ### RegexRule
 
 The `RegexRule` struct allows use of regular expressions to define rules for
-detecting the start and end of fragments. You can also use capture groups in the
-`End` regex to dynamically replace placeholders in the matched text.
+detecting the start and stop of fragments. Capture groups are supported in the
+`Stop` regex to dynamically replace placeholders by positional values found
+during `Start` regex's call.
 
-To handle capture group, the `RegexRule` must be passed by pointer:
+The following example use a regular expression to find the start of a
+[dollar-quoted string], in which we should ignore delimiters. To handle capture
+group, the `RegexRule` must be passed by pointer.
+
+[dollar-quoted string]: https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-DOLLAR-QUOTING
 
 ```go
 // define a postgresql dollar-quoted expression rule
 dollar := &fragment.RegexRule{
     Start: `\$([a-zA-Z0-9_]*)\$`,
-    End:   `\$\1\$`,
+    Stop:  `\$\1\$`,
 }
 
 // define a new language to split queries from a text
@@ -78,19 +81,31 @@ pgsql := fragment.Language{
 ### Splitting Text
 
 You can use the `Split` method of the `Language` struct to split text into
-fragments based on the defined rules and delimiters.
+fragments based on the defined rules and delimiters. All leading and trailing
+white space for each fragment are removed.
 
 ```go
 // split the source text into fragments
-fragments := file.Split(`
+fragments := text.Split(`
     Line 1
     Line 2 \
       on multiple lines
     Line 3
 `)
 
-// will print "Found 3 fragments"
-fmt.Println("Found", len(fragments), "fragments")
+for _, fragment := range fragments {
+    fmt.Print("---- ")
+    fmt.Println(fragment)
+}
+```
+
+Will print:
+
+```
+---- Line 1
+---- Line 2 \
+      on multiple lines
+---- Line 3
 ```
 
 ## Contributing
@@ -101,7 +116,4 @@ please create an issue.
 
 ## License
 
-This project is licensed under the [MIT] License - see the [LICENSE] file for
-details.
-
-[MIT]: https://choosealicense.com/licenses/mit
+This project is licensed under the [MIT License](LICENSE).

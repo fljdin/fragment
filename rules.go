@@ -6,30 +6,30 @@ import (
 )
 
 type Rule interface {
-	IsStartDetected(input []byte) bool
-	IsEndDetected(input []byte) bool
+	IsStarted(input []byte) bool
+	IsStopped(input []byte) bool
 }
 
 type StringRule struct {
 	Start string
-	End   string
+	Stop  string
 }
 
-func (s StringRule) IsStartDetected(input []byte) bool {
+func (s StringRule) IsStarted(input []byte) bool {
 	return hasSuffixFold(input, toBytes(s.Start))
 }
 
-func (s StringRule) IsEndDetected(input []byte) bool {
-	return hasSuffixFold(input, toBytes(s.End))
+func (s StringRule) IsStopped(input []byte) bool {
+	return hasSuffixFold(input, toBytes(s.Stop))
 }
 
 type RegexRule struct {
 	Start   string
-	End     string
+	Stop    string
 	matches [][]byte
 }
 
-func (r *RegexRule) IsStartDetected(input []byte) bool {
+func (r *RegexRule) IsStarted(input []byte) bool {
 	// append $ to match only the end of the input
 	re := regexp.MustCompile(r.Start + `$`)
 	r.matches = re.FindSubmatch(input)
@@ -37,7 +37,7 @@ func (r *RegexRule) IsStartDetected(input []byte) bool {
 	return len(r.matches) > 0
 }
 
-func (r RegexRule) IsEndDetected(input []byte) bool {
+func (r RegexRule) IsStopped(input []byte) bool {
 	// append $ to match only the end of the input
 	re := regexp.MustCompile(r.groupAsRegex() + `$`)
 	return re.Match(input)
@@ -45,7 +45,7 @@ func (r RegexRule) IsEndDetected(input []byte) bool {
 
 func (r RegexRule) groupAsRegex() string {
 	re := regexp.MustCompile(`\\(\d)`)
-	result := re.ReplaceAllFunc([]byte(r.End), func(match []byte) []byte {
+	result := re.ReplaceAllFunc([]byte(r.Stop), func(match []byte) []byte {
 		idxStr := match[1:]
 		idx, err := strconv.Atoi(string(idxStr))
 		// replace unkown index by empty string
