@@ -1,19 +1,12 @@
-package tests
+package languages_test
 
 import (
 	"testing"
 
-	. "github.com/fljdin/fragment"
+	. "github.com/fljdin/fragment/languages"
 	"github.com/lithammer/dedent"
 	"github.com/stretchr/testify/require"
 )
-
-var xml = Language{
-	Delimiters: []string{`\n`},
-	Rules: []Rule{
-		&RegexRule{Start: `(?i)<(\w+)>`, Stop: `(?i)</\1>`},
-	},
-}
 
 func TestMixedCaseMarkup(t *testing.T) {
 	input := dedent.Dedent(`
@@ -32,6 +25,6 @@ func TestMixedCaseMarkup(t *testing.T) {
 		</NOTE>
 	`)
 
-	fragments := xml.Split(input)
+	fragments := XML.Split(input)
 	require.Equal(t, 2, len(fragments))
 }

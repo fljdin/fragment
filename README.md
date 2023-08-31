@@ -16,6 +16,64 @@ Install package using the following command:
 go get github.com/fljdin/fragment
 ```
 
+## Predefined languages
+
+The `fragment/languages` package offers several predefined languages to help you
+split text into fragments based on language-specific rules.
+
+* The `PgSQL` defines delimiters for SQL statements and special PostgreSQL
+  commands (like `\g` or `\gexec`). It also specifies various rules to handle
+  comments, single-quoted and double-quoted string literals, transactions
+  BEGIN-END blocks, and dollar-quoted strings.
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/fljdin/fragment/languages"
+)
+
+func main() {
+    // Define a PostgreSQL query containing multiple 
+    // SQL statements
+    queries := `
+        SELECT * FROM employees;
+        -- This is a comment
+        INSERT INTO products VALUES (1, 'Product 1');
+        BEGIN;
+        UPDATE orders SET status = 'Shipped' 
+         WHERE order_id = 100;
+        COMMIT;
+        $custom_tag$
+        This is a custom tag.
+        $custom_tag$
+    `
+
+    // Split an SQL file script into fragments using 
+    // the PgSQL language configuration
+    fragments := languages.PgSQL.Split(queries)
+
+    // Print the extracted fragments
+    for i, fragment := range fragments {
+        fmt.Printf("Fragment %d:\n%s\n\n", i+1, fragment)
+    }
+}
+```
+
+* `Shell` defines a newline delimiter, allowing for the accurate splitting of Shell
+  code into meaningful fragments. The configuration also includes rules for
+  handling single-quoted and double-quoted string literals, line continuation
+  with backslashes, Shell-style comments, and Here-Documents (Heredocs).
+
+* `XML` defines a newline delimiter to split documents. The primary rule in this
+  configuration identifies XML tags, both opening and closing tags, in a
+  case-insensitive manner.
+
+These predefined languages make it easy to split text into fragments based on
+language-specific rules, which can be useful in various text processing
+applications.
+
 ## Usage
 
 ```go
@@ -26,16 +84,34 @@ Every text input follows predefined language's delimiters and rules.
 
 * The `Language` struct defines the **delimiters** and **rules** required by
   text splitting.
-* A new fragment is built as soon as one of the **delimiters** is detected when
-  reading the text.
+* A new fragment is built as soon as a `Delimiter` is detected when reading the
+  text.
 * Each `Rule` consists of a start and stop condition that defines a context in
   which **delimiters** and other **rules** should be ignored.
 
+### Delimiter
+
+The `Delimiter` struct determines whether the fragment must be built when it
+encounters a simple string or when it matches a regular expression. This
+distinction is mainly made for performance reasons.
+
+```go
+// define a newline delimiter
+newline := fragment.Delimiter{
+    String: "\n",
+}
+
+// define a psql's meta-command delimiter
+command := fragment.Delimiter{
+    Regex: `\\g.*\n`,
+}
+```
+
 ### StringRule
 
-The `StringRule` struct defines simple string-based rules to detect the start
-and stop of fragments. Here's a concise example of newline separated fragments
-with an exception rule when escape character preceed a newline (inpired from
+The `StringRule` struct defines simple string-based rules to detect start and
+stop of fragments. Here's a concise example of newline separated fragments with
+an exception rule when an escape character preceeds a newline (inpired from
 shell syntax).
 
 ```go
@@ -47,7 +123,7 @@ escape := fragment.StringRule{
 
 // define a new language to split lines from a text
 text := fragment.Language{
-    Delimiters: []string{"\n"},
+    Delimiters: []fragment.Delimiter{newline},
     Rules:      []fragment.Rule{escape},
 }
 ```
@@ -65,7 +141,7 @@ comment := fragment.StringRule{
 
 // define a new language to split commands from a script
 shell := fragment.Language{
-    Delimiters: []string{"\n"},
+    Delimiters: []fragment.Delimiter{newline},
     Rules:      []fragment.Rule{comment}
 }
 ```
@@ -92,7 +168,7 @@ dollar := &fragment.RegexRule{
 
 // define a new language to split queries from a text
 pgsql := fragment.Language{
-    Delimiters: []string{";"},
+    Delimiters: []fragment.Delimiter{{String: ";"}},
     Rules:      []fragment.Rule{dollar}
 }
 ```
@@ -111,7 +187,7 @@ markup := &fragment.RegexRule{
 
 // define a new language to split XML documents from a file
 xml := fragment.Language{
-    Delimiters: []string{`\n`},
+    Delimiters: []fragment.Delimiter{newline},
     Rules:      []fragment.Rule{markup},
 }
 ```
@@ -148,10 +224,10 @@ Will print:
 
 ## Testing
 
-Unit tests are provided under `tests` package.
+Unit tests are provided under `languages` package.
 
 ```bash
-go test ./tests
+go test ./languages
 ```
 
 ## Contributing

@@ -1,29 +1,15 @@
-package tests
+package languages_test
 
 import (
 	"testing"
 
-	. "github.com/fljdin/fragment"
+	. "github.com/fljdin/fragment/languages"
 	"github.com/lithammer/dedent"
 	"github.com/stretchr/testify/require"
 )
 
-var shell = Language{
-	Delimiters: []string{"\n"},
-	Rules: []Rule{
-		StringRule{Start: `'`, Stop: `'`},
-		StringRule{Start: `"`, Stop: `"`},
-		StringRule{Start: "\\", Stop: "\n"},
-		StringRule{Start: "#", StopAtDelim: true},
-		&RegexRule{
-			Start: `<<-?\s*"?'?([^"'<>\s\n]+).*\n`,
-			Stop:  `\n\1`,
-		},
-	},
-}
-
 func TestNewlineDelimiter(t *testing.T) {
-	fragments := shell.Split("true\nfalse")
+	fragments := Shell.Split("true\nfalse")
 
 	require.Equal(t, "true", fragments[0])
 	require.Equal(t, "false", fragments[1])
@@ -35,7 +21,7 @@ func TestIgnoreEmptyLines(t *testing.T) {
 
 		false
 	`)
-	fragments := shell.Split(input)
+	fragments := Shell.Split(input)
 
 	require.Equal(t, "true", fragments[0])
 	require.Equal(t, "false", fragments[1])
@@ -52,7 +38,7 @@ func TestMultilineStringRule(t *testing.T) {
 		"echo \"hello '\nworld\"",
 		"echo 'hello \"\nworld'",
 	}
-	fragments := shell.Split(input)
+	fragments := Shell.Split(input)
 
 	for i, fragment := range fragments {
 		require.Equal(t, expected[i], fragment)
@@ -65,7 +51,7 @@ func TestNewlineEscapeRule(t *testing.T) {
 		  && false
 		false
 	`)
-	fragments := shell.Split(input)
+	fragments := Shell.Split(input)
 
 	require.Equal(t, "true \\\n  && false", fragments[0])
 	require.Equal(t, "false", fragments[1])
@@ -76,7 +62,7 @@ func TestCommentRule(t *testing.T) {
 		true # comment \
 		false
 	`)
-	fragments := shell.Split(input)
+	fragments := Shell.Split(input)
 
 	require.Equal(t, "true # comment \\", fragments[0])
 	require.Equal(t, "false", fragments[1])
@@ -99,7 +85,7 @@ func TestHereDocRule(t *testing.T) {
 		"cat <<- \"EOF\"\nhello world\nEOF",
 		"cat << 'content' > content.txt\nhello world\ncontent",
 	}
-	fragments := shell.Split(input)
+	fragments := Shell.Split(input)
 
 	for i, fragment := range fragments {
 		require.Equal(t, expected[i], fragment)
