@@ -14,7 +14,7 @@ func TestIgnoreEmptyFragments(t *testing.T) {
 	require.Equal(t, 0, len(fragments))
 }
 
-func TestSemicolonDelimiter(t *testing.T) {
+func TestPgSQLSemicolonDelimiter(t *testing.T) {
 	input := "SELECT 1; SELECT 2; SELECT 3;"
 	expected := []string{"SELECT 1;", "SELECT 2;", "SELECT 3;"}
 	fragments := PgSQL.Split(input)

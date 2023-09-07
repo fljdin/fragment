@@ -15,6 +15,13 @@ func TestNewlineDelimiter(t *testing.T) {
 	require.Equal(t, "false", fragments[1])
 }
 
+func TestShellSemicolonDelimiter(t *testing.T) {
+	fragments := Shell.Split("true; false")
+
+	require.Equal(t, "true;", fragments[0])
+	require.Equal(t, "false", fragments[1])
+}
+
 func TestIgnoreEmptyLines(t *testing.T) {
 	input := dedent.Dedent(`
 		true

@@ -4,6 +4,9 @@ import "github.com/fljdin/fragment"
 
 var Shell = fragment.Language{
 	Delimiters: []fragment.Delimiter{
+		// Delimiter for inlined commands
+		{String: ";"},
+
 		// Delimiter for line endings, indicating the end of a line
 		{String: "\n"},
 	},

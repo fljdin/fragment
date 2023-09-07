@@ -61,10 +61,11 @@ func main() {
 }
 ```
 
-* `Shell` defines a newline delimiter, allowing for the accurate splitting of Shell
-  code into meaningful fragments. The configuration also includes rules for
-  handling single-quoted and double-quoted string literals, line continuation
-  with backslashes, Shell-style comments, and Here-Documents (Heredocs).
+* `Shell` defines semicolon and newline delimiters, allowing for the accurate
+  splitting of Shell code into meaningful fragments. The configuration also
+  includes rules for handling single-quoted and double-quoted string literals,
+  line continuation with backslashes, Shell-style comments, and Here-Documents
+  (Heredocs).
 
 * `XML` defines a newline delimiter to split documents. The primary rule in this
   configuration identifies XML tags, both opening and closing tags, in a
