@@ -3,10 +3,15 @@ package languages_test
 import (
 	"testing"
 
+	"github.com/fljdin/fragment"
 	. "github.com/fljdin/fragment/languages"
 	"github.com/lithammer/dedent"
 	"github.com/stretchr/testify/require"
 )
+
+func init() {
+	fragment.TrimOption = true
+}
 
 func TestMixedCaseMarkup(t *testing.T) {
 	input := dedent.Dedent(`

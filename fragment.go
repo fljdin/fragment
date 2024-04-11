@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+var TrimOption bool = false
+
 type Language struct {
 	Delimiters []Delimiter
 	Rules      []Rule
@@ -20,6 +22,9 @@ func (lang *Language) Split(input string) (fragments []string) {
 	go lang.Read(ch, strings.NewReader(input))
 
 	for fragment := range ch {
+		if len(fragment) == 0 {
+			continue
+		}
 		fragments = append(fragments, fragment)
 	}
 	return
@@ -64,22 +69,21 @@ Scan:
 		// Look for a delimiter
 		for _, delimiter := range lang.Delimiters {
 			if delimiter.IsDetected(fragment.Bytes()) {
-				str := strings.TrimSpace(fragment.String())
-				if len(str) > 0 {
-					ch <- str
-				}
+				ch <- trim(fragment.String())
 				fragment.Reset()
 				break
 			}
 		}
 	}
 
-	if fragment.Len() > 0 {
-		str := strings.TrimSpace(fragment.String())
-		if len(str) > 0 {
-			ch <- str
-		}
+	ch <- trim(fragment.String())
+}
+
+func trim(s string) string {
+	if TrimOption {
+		return strings.TrimSpace(s)
 	}
+	return s
 }
 
 type Delimiter struct {
