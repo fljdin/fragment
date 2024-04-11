@@ -223,6 +223,20 @@ Will print:
 ---- Line 3
 ```
 
+When dealing with an input stream, prefer use `Read` method and consume a string
+channel like this:
+
+```go
+// open a string channel
+ch := make(chan string)
+go text.Read(ch, os.Stdin)
+
+for fragment := range ch {
+    fmt.Print("---- ")
+    fmt.Println(fragment)
+}
+```
+
 ## Testing
 
 Unit tests are provided under `languages` package.
