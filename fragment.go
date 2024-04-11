@@ -3,29 +3,35 @@ package fragment
 import (
 	"bufio"
 	"bytes"
+	"io"
 	"regexp"
 	"strconv"
 	"strings"
 )
-
-func trimAndAppend(slice []string, element string) []string {
-	element = strings.TrimSpace(element)
-	if len(element) > 0 {
-		return append(slice, element)
-	}
-	return slice
-}
 
 type Language struct {
 	Delimiters []Delimiter
 	Rules      []Rule
 }
 
-func (lang Language) Split(input string) []string {
-	var fragment bytes.Buffer
-	var fragments []string
+// Split() splits the input string into fragments.
+func (lang *Language) Split(input string) (fragments []string) {
+	ch := make(chan string)
+	go lang.Read(ch, strings.NewReader(input))
 
-	scanner := bufio.NewScanner(strings.NewReader(input))
+	for fragment := range ch {
+		fragments = append(fragments, fragment)
+	}
+	return
+}
+
+// Read() reads the input stream and pushes to the fragments channel.
+func (lang *Language) Read(ch chan string, input io.Reader) {
+	defer close(ch)
+
+	var fragment bytes.Buffer
+
+	scanner := bufio.NewScanner(input)
 	scanner.Split(bufio.ScanBytes)
 
 	var currentRule Rule
@@ -58,7 +64,10 @@ Scan:
 		// Look for a delimiter
 		for _, delimiter := range lang.Delimiters {
 			if delimiter.IsDetected(fragment.Bytes()) {
-				fragments = trimAndAppend(fragments, fragment.String())
+				str := strings.TrimSpace(fragment.String())
+				if len(str) > 0 {
+					ch <- str
+				}
 				fragment.Reset()
 				break
 			}
@@ -66,10 +75,11 @@ Scan:
 	}
 
 	if fragment.Len() > 0 {
-		fragments = trimAndAppend(fragments, fragment.String())
+		str := strings.TrimSpace(fragment.String())
+		if len(str) > 0 {
+			ch <- str
+		}
 	}
-
-	return fragments
 }
 
 type Delimiter struct {
